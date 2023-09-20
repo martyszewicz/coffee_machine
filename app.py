@@ -55,22 +55,23 @@ def coffee_machine():
                 return render_template("coffee_machine.html")
             else:
                 db = get_db()
-                sql_statement = 'select transactionID, name, price from report;'
+                sql_statement = 'select name from report;'
                 cur = db.execute(sql_statement)
                 num_of_espressoo = 0
                 num_of_latte = 0
                 num_of_cappuccino = 0
-                data = cur.fetchone()
-                if 'espresso' in data:
-                    num_of_espressoo += 1
-                if 'latte' in data:
-                    num_of_latte += 1
-                if 'cappuccino' in data:
-                    num_of_cappuccino += 1
+                data = cur.fetchall()
+                for row in data:
+                    if row[0] == 'espresso':
+                        num_of_espressoo += 1
+                    if row[0] == 'latte':
+                        num_of_latte += 1
+                    if row[0] == 'cappuccino':
+                        num_of_cappuccino += 1
                 sql_earn = 'select SUM(price) from report;'
                 cur_earn = db.execute(sql_earn)
                 earn = cur_earn.fetchone()
-                flash(f"Number of espresso: {num_of_espressoo} \nNumber of latte: {num_of_latte} \nNumber of cappuccino: {num_of_cappuccino} \nEarn: {earn[0]}")
+                flash(f"Number of espresso: {num_of_espressoo} \nNumber of latte: {num_of_latte} \nNumber of cappuccino: {num_of_cappuccino} \nEarn: {round(earn[0], 2)}")
                 return render_template("coffee_machine.html")
         if reset:
             if transaction.budget > 0:
@@ -85,6 +86,10 @@ def coffee_machine():
         if accept:
             if transaction.budget >= transaction.price:
                 refund = transaction.budget - transaction.price
+                db = get_db()
+                sql_command = 'insert into report (name, price) values (?, ?);'
+                db.execute(sql_command, [transaction.user_choice, transaction.price])
+                db.commit()
                 if refund > 0:
                     rest = round(refund, 2)
                     flash(f"Your coffee {transaction.user_choice} \nis ready, \nrefund is {rest}, enjoy")
