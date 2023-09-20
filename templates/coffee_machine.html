@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Coffee_machine</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="coffee_header">
+            <div class="buttons">
+                <form action="{{ url_for('coffee_machine')}}" method="POST">
+                        <button name="user_choice" value="espresso" class="button button1" >
+                            <img src="{{ url_for('static', filename='button.png') }}">
+                        </button>
+
+                    <div class="coffee_header_buttons_text coffee_header_button_one_text">
+                        <svg width="130px" height="130px" >
+                            <path id="curve" d="M 0 30 C 0 30, 40 0, 70 30"></path>
+                            <text class="text" font-size="15px" text-anchor="middle">
+                                <textPath class="text__path" href="#curve" startOffset="50%">Espresso</textPath>
+                            </text>
+                        </svg>
+                    </div>
+
+                        <button name="user_choice" value="latte" class="button button2" >
+                            <img src="{{ url_for('static', filename='button.png') }}">
+                        </button>
+
+                    <div class="coffee_header_buttons_text coffee_header_button_two_text">
+                        <svg width="130px" height="130px">
+                            <path id="curve" d="M 0 30 C 0 30, 40 0, 70 30"></path>
+                            <text class="text" font-size="15px" text-anchor="middle">
+                                <textPath class="text__path" href="#curve" startOffset="50%">Latte</textPath>
+                            </text>
+                        </svg>
+                    </div>
+
+                        <button name="user_choice" value="cappuccino" class="button button3" >
+                            <img src="{{ url_for('static', filename='button.png') }}">
+                        </button>
+
+                    <div class="coffee_header_buttons_text coffee_header_button_three_text">
+                        <svg width="130px" height="130px" >
+                            <path id="curve" d="M 0 30 C 0 30, 40 0, 70 30"></path>
+                            <text class="text" font-size="15px"  text-anchor="middle">
+                                <textPath class="text__path" href="#curve" startOffset="50%">Cappuccino</textPath>
+                            </text>
+                        </svg>
+                    </div>
+
+                    <button name="report" value="report" class="report" >Report
+                            <img src="{{ url_for('static', filename='button.png') }}">
+                        </button>
+
+                </form>
+            </div>
+                <div class="coffee_header_display">
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            <ul>
+                                {% for message in messages %}
+                                    <li><pre>{{ message | safe }}</pre></li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+
+            <div class="coffee_header_details">
+                <form action="{{ url_for('coffee_machine')}}" method="POST">
+                    <button class="accept" type="submit" name="accept" value="accept">ACCEPT</button>
+                    <button class="reset" type="submit" name="reset" value="reset">RESET</button>
+                </form>
+            </div>
+
+            <div class="coffee_header_text">Please insert coins here ➡</div>
+        </div>
+        <div class="coffee_medium">
+            <div class="coffee_medium_exit"></div>
+            <div class="coffee_medium_cup"></div>
+        </div>
+        <div class="coffee_footer"></div>
+    </div>
+</body>
+</html>
