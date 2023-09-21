@@ -5,9 +5,7 @@ import pdb
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "Something"
 
-app_info = {
-    'db_file' : r'C:\Users\marty\OneDrive\Pulpit\Programowanie\Zapisane_kody\coffee_machine\data\coffee.db'
-}
+app_info = {'db_file': r'data/coffee.db'}
 
 class Transaction:
     def __init__(self, user_choice, budget, price):
@@ -42,7 +40,8 @@ def close_db(error):
 @app.route("/", methods=['GET', 'POST'])
 def coffee_machine():
     if request.method == 'GET':
-        flash ('Stand by, please select coffee')
+        # Start position
+        flash ('Stand by, \nplease select coffee')
         return render_template("coffee_machine.html")
     else:
         report = request.form['report'] if 'report' in request.form else ''
@@ -50,10 +49,13 @@ def coffee_machine():
         reset = request.form['reset'] if 'reset' in request.form else ''
         accept = request.form['accept'] if 'accept' in request.form else ''
         if report:
+            # If user press 'report button'
             if transaction.budget:
+                # Report can be displayed only when there is no transaction in progress
                 flash("For view a report please \nreset coffee machine")
                 return render_template("coffee_machine.html")
             else:
+                # build report from database
                 db = get_db()
                 sql_statement = 'select name from report;'
                 cur = db.execute(sql_statement)
@@ -74,23 +76,30 @@ def coffee_machine():
                 flash(f"Number of espresso: {num_of_espressoo} \nNumber of latte: {num_of_latte} \nNumber of cappuccino: {num_of_cappuccino} \nEarn: {round(earn[0], 2)}")
                 return render_template("coffee_machine.html")
         if reset:
+            # If user press 'reset' button
             if transaction.budget > 0:
+                # If user insert coins to ekspress
                 rest = round(transaction.budget, 2)
                 flash(f"Coffee machine reset, \nyour refund {rest}")
                 transaction.reset()
                 return render_template("coffee_machine.html")
             else:
+                # If there is no coins in express
                 transaction.reset()
                 flash('Stand by, \nplease select coffee')
                 return render_template("coffee_machine.html")
         if accept:
+            # If user press 'accept' button
             if transaction.budget >= transaction.price:
+                # Check if user insert enough coins
                 refund = transaction.budget - transaction.price
                 db = get_db()
+                # Save info about transaction to database sqlite3
                 sql_command = 'insert into report (name, price) values (?, ?);'
                 db.execute(sql_command, [transaction.user_choice, transaction.price])
                 db.commit()
                 if refund > 0:
+                    # Check refund
                     rest = round(refund, 2)
                     flash(f"Your coffee {transaction.user_choice} \nis ready, \nrefund is {rest}, enjoy")
                     transaction.reset()
@@ -100,10 +109,12 @@ def coffee_machine():
                     transaction.reset()
                     return render_template("coffee_machine.html")
             else:
+                # If user press 'accept' button but there is lack of coins in express
                 lack = transaction.price - transaction.budget
                 flash(f"{transaction.user_choice}. \nNot enough money, \nplease insert {round(lack, 2)} more")
                 return render_template("prepare_coffee.html")
         if user_choice:
+            # change information on display about order
             db = get_db()
             sql_statement = 'select id, name, price from coffee where name =?;'
             cur = db.execute(sql_statement, [user_choice])
@@ -113,10 +124,11 @@ def coffee_machine():
             flash(f"Price: {transaction.price}zł; \nYour budget: {round(transaction.budget, 2)}zł")
             return render_template("prepare_coffee.html")
         else:
+            # change user budget after insert coins
             budget_change = request.form['budget'] if 'budget' in request.form else ''
             transaction.budget_change(budget_change)
             flash(f"Price: {transaction.price}zł; \nYour budget: {round(transaction.budget, 2)}zł")
             return render_template("prepare_coffee.html")
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0", port=int("3000"), debug=True)
